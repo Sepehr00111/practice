@@ -1,77 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Tour Search</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .search-container {
-      background-color: white;
-      padding: 10px;
-      border-radius: 5px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-    input[type="text"] {
-      padding: 5px;
-      width: 200px;
-      border: 1px solid #ccc;
-      border-radius: 3px;
-    }
-    button {
-      padding: 5px 10px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced 3D Search Bar</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        .search-container {
+            position: relative;
+            width: 350px;
+            perspective: 1000px; /* Adds 3D effect */
+        }
+        .search-bar {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 25px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            background: #fff;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        .search-bar:focus {
+            outline: none;
+            transform: translateZ(20px) rotateX(5deg); /* 3D tilt on focus */
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.3);
+        }
+        .suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            z-index: 10;
+        }
+        .suggestions div {
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .suggestions div:hover {
+            background: #e0e0e0;
+        }
+        .search-container.active .suggestions {
+            display: block;
+        }
+    </style>
 </head>
 <body>
-  <div class="search-container">
-    <input type="text" id="searchInput" placeholder="Enter location...">
-    <button onclick="searchTour()">Search</button>
-  </div>
+    <div class="search-container">
+        <input type="text" class="search-bar" placeholder="Search the tour...">
+        <div class="suggestions"></div>
+    </div>
 
-  <script>
-    function searchTour() {
-      // Get the user's input and convert to lowercase for case-insensitive matching
-      let query = document.getElementById("searchInput").value.toLowerCase().trim();
-      
-      // Define the base URL of your published 3DVista tour
-      const baseUrl = "https://yourdomain.com/your-tour/index.html";
-      
-      // Map search terms to panorama names (these must match your 3DVista panorama names exactly)
-      if (query === "kitchen") {
-        window.parent.location.href = `${baseUrl}?media-name=Kitchen_Panorama`;
-      } else if (query === "bedroom") {
-        window.parent.location.href = `${baseUrl}?media-name=Bedroom_Panorama`;
-         } else if (query === "kerman") {
-        window.parent.location.href = `${baseUrl}?media-name=kerman_Panorama`;
-      } else if (query === "garden") {
-        window.parent.location.href = `${baseUrl}?media-name=Garden_Panorama`;
-      } else {
-        alert("Sorry, that location wasn’t found!");
-      }
-    }
+    <script>
+        const searchBar = document.querySelector('.search-bar');
+        const suggestionsBox = document.querySelector('.suggestions');
+        const container = document.querySelector('.search-container');
 
-    // Optional: Trigger search when pressing Enter key
-    document.getElementById("searchInput").addEventListener("keypress", function(event) {
-      if (event.key === "Enter") {
-        searchTour();
-      }
-    });
-  </script>
+        // Sample data for suggestions (replace with your tour data)
+        const tourItems = [
+            "Living Room",
+            "Kitchen",
+            "Bedroom",
+            "Garden",
+            "kerman motor",
+            "360 Panorama"
+        ];
+
+        searchBar.addEventListener('input', function() {
+            const query = this.value.toLowerCase();
+            suggestionsBox.innerHTML = '';
+
+            if (query) {
+                const matches = tourItems.filter(item => item.toLowerCase().includes(query));
+                matches.forEach(match => {
+                    const suggestion = document.createElement('div');
+                    suggestion.textContent = match;
+                    suggestion.addEventListener('click', () => {
+                        searchBar.value = match;
+                        suggestionsBox.innerHTML = '';
+                        container.classList.remove('active');
+                        // Add your 3DVista action here (e.g., jump to panorama)
+                        trigger3DVistaAction(match);
+                    });
+                    suggestionsBox.appendChild(suggestion);
+                });
+                container.classList.add('active');
+            } else {
+                container.classList.remove('active');
+            }
+        });
+
+        // Simulate a 3DVista action (replace with actual 3DVista API call)
+        function trigger3DVistaAction(selectedItem) {
+            console.log(`Navigating to: ${selectedItem}`);
+            // Example: In 3DVista, use JavaScript to call an action like "Go to Panorama"
+            // window.parent.postMessage({ action: 'goToPanorama', target: selectedItem }, '*');
+        }
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!container.contains(e.target)) {
+                container.classList.remove('active');
+            }
+        });
+    </script>
 </body>
 </html>
